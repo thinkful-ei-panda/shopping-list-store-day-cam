@@ -1,3 +1,5 @@
+/* eslint-disable no-undef */
+/* eslint-disable strict */
 const store = {
   items: [
     { id: cuid(), name: 'apples', checked: false },
@@ -8,7 +10,7 @@ const store = {
   hideCheckedItems: false
 };
 
-const generateItemElement = function (item) {
+function generateItemElement(item) {
   let itemTitle = `<span class='shopping-item shopping-item__checked'>${item.name}</span>`;
   if (!item.checked) {
     itemTitle = `
@@ -26,19 +28,43 @@ const generateItemElement = function (item) {
         <button class='shopping-item-delete js-item-delete'>
           <span class='button-label'>delete</span>
         </button>
+        <button class='shopping-item-edit js-item-edit'>
+          <span class='button-label'>edit</span>
+        </button>
       </div>
     </li>`;
-};
+}
 
-const generateShoppingItemsString = function (shoppingList) {
+function generateEditItemElement(item) {
+  console.log('generateEditItemElement ran!');
+  let itemEditField = `<form class="js-item-rename" data-item-id='${item.id}'>
+                        <input class="js-item-rename" type="text" value="${item.name}"></input>
+                        <button class="js-item-rename" type="submit">Rename</button>
+                      </form>`;
+
+  return `
+    <li class='js-item-element' data-item-id='${item.id}'>
+      ${itemEditField}
+      <div class='shopping-item-controls'>
+        <button class='shopping-item-toggle js-item-toggle'>
+          <span class='button-label'>check</span>
+        </button>
+        <button class='shopping-item-delete js-item-delete'>
+          <span class='button-label'>delete</span>
+        </button>
+      </div>
+    </li>`;
+}
+
+function generateShoppingItemsString(shoppingList) {
   const items = shoppingList.map((item) => generateItemElement(item));
   return items.join('');
-};
+}
 
 /**
  * Render the shopping list in the DOM
  */
-const render = function () {
+function render() {
   // Set up a copy of the store's items in a local 
   // variable 'items' that we will reassign to a new
   // version if any filtering of the list occurs.
@@ -60,13 +86,13 @@ const render = function () {
 
   // insert that HTML into the DOM
   $('.js-shopping-list').html(shoppingListItemsString);
-};
+}
 
-const addItemToShoppingList = function (itemName) {
+function addItemToShoppingList(itemName) {
   store.items.push({ id: cuid(), name: itemName, checked: false });
-};
+}
 
-const handleNewItemSubmit = function () {
+function handleNewItemSubmit() {
   $('#js-shopping-list-form').submit(function (event) {
     event.preventDefault();
     const newItemName = $('.js-shopping-list-entry').val();
@@ -74,32 +100,32 @@ const handleNewItemSubmit = function () {
     addItemToShoppingList(newItemName);
     render();
   });
-};
+}
 
-const toggleCheckedForListItem = function (id) {
+function toggleCheckedForListItem(id) {
   const foundItem = store.items.find(item => item.id === id);
   foundItem.checked = !foundItem.checked;
-};
+}
 
-const handleItemCheckClicked = function () {
+function handleItemCheckClicked() {
   $('.js-shopping-list').on('click', '.js-item-toggle', event => {
     const id = getItemIdFromElement(event.currentTarget);
     toggleCheckedForListItem(id);
     render();
   });
-};
+}
 
-const getItemIdFromElement = function (item) {
+function getItemIdFromElement(item) {
   return $(item)
     .closest('.js-item-element')
     .data('item-id');
-};
+}
 
 /**
  * Responsible for deleting a list item.
  * @param {string} id 
  */
-const deleteListItem = function (id) {
+function deleteListItem(id) {
   // As with 'addItemToShoppingLIst', this 
   // function also has the side effect of
   // mutating the global store value.
@@ -112,9 +138,9 @@ const deleteListItem = function (id) {
   // the list item we want to remove, with 
   // a removeCount of 1.
   store.items.splice(index, 1);
-};
+}
 
-const handleDeleteItemClicked = function () {
+function handleDeleteItemClicked() {
   // Like in `handleItemCheckClicked`, 
   // we use event delegation.
   $('.js-shopping-list').on('click', '.js-item-delete', event => {
@@ -125,25 +151,44 @@ const handleDeleteItemClicked = function () {
     // Render the updated shopping list.
     render();
   });
-};
+}
 
 /**
  * Toggles the store.hideCheckedItems property
  */
-const toggleCheckedItemsFilter = function () {
+function toggleCheckedItemsFilter() {
   store.hideCheckedItems = !store.hideCheckedItems;
-};
+}
 
 /**
  * Places an event listener on the checkbox 
  * for hiding completed items.
  */
-const handleToggleFilterClick = function () {
+function handleToggleFilterClick() {
   $('.js-filter-checked').click(() => {
     toggleCheckedItemsFilter();
     render();
   });
-};
+}
+
+function handleItemRenameClick() {
+  $('.js-item-edit').click(() => {
+    const id = getItemIdFromElement(event.currentTarget);
+    const item = store.items.find(i => i.id = id);
+    $(`li[data-item-id=${id}]`).html(generateEditItemElement(item));
+  });
+}
+
+function handleItemNameSubmitClick() {
+  $('.js-item-rename').on('submit', () => {
+    console.log('handleItemNameSubmitClick ran!');
+    event.preventDefault();
+    const id = getItemIdFromElement(event.currentTarget);
+    const item = store.items.find(i => i.id = id);
+    item.id.name = $(`li[data-item-id=${id}]`).val();
+    render();
+  });
+}
 
 /**
  * This function will be our callback when the
@@ -154,13 +199,15 @@ const handleToggleFilterClick = function () {
  * "check" and "delete" buttons for individual 
  * shopping list items.
  */
-const handleShoppingList = function () {
+function handleShoppingList() {
   render();
+  handleItemRenameClick();
   handleNewItemSubmit();
   handleItemCheckClicked();
   handleDeleteItemClicked();
   handleToggleFilterClick();
-};
+  handleItemNameSubmitClick();
+}
 
 // when the page loads, call `handleShoppingList`
 $(handleShoppingList);
