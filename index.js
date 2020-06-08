@@ -37,23 +37,11 @@ function generateItemElement(item) {
 
 function generateEditItemElement(item) {
   console.log('generateEditItemElement ran!');
-  let itemEditField = `<form class="js-item-rename" data-item-id='${item.id}'>
-                        <input class="js-item-rename" type="text" value="${item.name}"></input>
-                        <button class="js-item-rename" type="submit">Rename</button>
+  return `<form class="js-item-rename" data-item-id='${item.id}'>
+                        <input class="" type="text" value="${item.name}"></input>
+                        <button class="" type="submit">Rename</button>
                       </form>`;
 
-  return `
-    <li class='js-item-element' data-item-id='${item.id}'>
-      ${itemEditField}
-      <div class='shopping-item-controls'>
-        <button class='shopping-item-toggle js-item-toggle'>
-          <span class='button-label'>check</span>
-        </button>
-        <button class='shopping-item-delete js-item-delete'>
-          <span class='button-label'>delete</span>
-        </button>
-      </div>
-    </li>`;
 }
 
 function generateShoppingItemsString(shoppingList) {
@@ -174,18 +162,21 @@ function handleToggleFilterClick() {
 function handleItemRenameClick() {
   $('.js-item-edit').click(() => {
     const id = getItemIdFromElement(event.currentTarget);
-    const item = store.items.find(i => i.id = id);
-    $(`li[data-item-id=${id}]`).html(generateEditItemElement(item));
+    console.log(`Edit item ${id}`);
+    const item = store.items.find(i => i.id === id);
+    console.log(`Item: `, item);
+    $(`li[data-item-id=${id}] .shopping-item`).html(generateEditItemElement(item));
+    handleItemNameSubmitClick();
   });
 }
 
 function handleItemNameSubmitClick() {
-  $('.js-item-rename').on('submit', () => {
+  $('.js-item-rename').on('submit', event => {
     console.log('handleItemNameSubmitClick ran!');
     event.preventDefault();
     const id = getItemIdFromElement(event.currentTarget);
-    const item = store.items.find(i => i.id = id);
-    item.id.name = $(`li[data-item-id=${id}]`).val();
+    const item = store.items.find(i => i.id === id);
+    item.name = $(`li[data-item-id=${id}] input[type=text]`).val();
     render();
   });
 }
